@@ -4,12 +4,13 @@ import { RouterOutlet, RouterModule, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
+import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, RouterLinkActive, TranslatePipe, ThemeToggleComponent, LanguageSwitcherComponent],
+  imports: [CommonModule, RouterOutlet, RouterModule, RouterLinkActive, TranslatePipe, ThemeToggleComponent, LanguageSwitcherComponent, ToastComponent],
   template: `
     <div class="flex h-screen overflow-hidden" style="background: var(--bg)">
 
@@ -108,6 +109,7 @@ import { AuthService } from '../../core/services/auth.service';
         </main>
       </div>
     </div>
+    <app-toast />
   `,
 })
 export class AdminLayoutComponent {
