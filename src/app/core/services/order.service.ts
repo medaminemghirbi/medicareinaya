@@ -1,43 +1,34 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore, collection, collectionData, addDoc, updateDoc,
-  doc, query, where, orderBy, serverTimestamp, getDocs
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 import { Order } from '../models/order.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private firestore = inject(Firestore);
-  private col = collection(this.firestore, 'orders');
+  private sb = inject(SupabaseService).client;
 
   async create(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
-    const ref = await addDoc(this.col, {
-      ...order,
-      created_at: serverTimestamp(),
-      updated_at: serverTimestamp(),
-    });
-    return ref.id;
+    const { data, error } = await this.sb.from('orders').insert(order).select('id').single();
+    if (error) throw error;
+    return data.id;
   }
 
   getByUser(userId: string): Observable<Order[]> {
-    return collectionData(
-      query(this.col, where('userId', '==', userId), orderBy('created_at', 'desc')),
-      { idField: 'id' }
-    ) as Observable<Order[]>;
+    return from(
+      this.sb.from('orders').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as Order[])
+    );
   }
 
   getAll(): Observable<Order[]> {
-    return collectionData(
-      query(this.col, orderBy('created_at', 'desc')),
-      { idField: 'id' }
-    ) as Observable<Order[]>;
+    return from(
+      this.sb.from('orders').select('*').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as Order[])
+    );
   }
 
   async updateStatus(id: string, status: Order['status']): Promise<void> {
-    await updateDoc(doc(this.firestore, 'orders', id), {
-      status,
-      updated_at: serverTimestamp(),
-    });
+    const { error } = await this.sb.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
   }
 }

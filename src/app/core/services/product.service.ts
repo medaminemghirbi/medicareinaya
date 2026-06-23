@@ -1,62 +1,62 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore, collection, collectionData, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy, where, getDoc, getDocs
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { Product, isLowStock, isNearExpiration, shouldHavePromotion } from '../models/product.model';
+import { from, Observable } from 'rxjs';
+import { SupabaseService } from './supabase.service';
+import { Product, shouldHavePromotion } from '../models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private firestore = inject(Firestore);
-  private col = collection(this.firestore, 'products');
+  private sb = inject(SupabaseService).client;
 
   getAll(): Observable<Product[]> {
-    return collectionData(query(this.col, orderBy('created_at', 'desc')), { idField: 'id' }) as Observable<Product[]>;
-  }
-
-  getByCategory(categoryId: string): Observable<Product[]> {
-    return collectionData(
-      query(this.col, where('category_id', '==', categoryId), where('status', '==', 'active')),
-      { idField: 'id' }
-    ) as Observable<Product[]>;
+    return from(
+      this.sb.from('products').select('*').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as Product[])
+    );
   }
 
   getFeatured(): Observable<Product[]> {
-    return collectionData(
-      query(this.col, where('status', '==', 'active'), orderBy('created_at', 'desc')),
-      { idField: 'id' }
-    ) as Observable<Product[]>;
+    return from(
+      this.sb.from('products').select('*').eq('status', 'active').order('created_at', { ascending: false }).limit(8)
+        .then(({ data }) => (data ?? []) as Product[])
+    );
+  }
+
+  getByCategory(categoryId: string): Observable<Product[]> {
+    return from(
+      this.sb.from('products').select('*').eq('category_id', categoryId).eq('status', 'active')
+        .then(({ data }) => (data ?? []) as Product[])
+    );
   }
 
   async getById(id: string): Promise<Product | null> {
-    const snap = await getDoc(doc(this.firestore, 'products', id));
-    return snap.exists() ? { id: snap.id, ...snap.data() } as Product : null;
-  }
-
-  async add(data: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
-    const enriched = this.enrichProduct(data);
-    await addDoc(this.col, { ...enriched, created_at: serverTimestamp(), updated_at: serverTimestamp() });
-  }
-
-  async update(id: string, data: Partial<Product>): Promise<void> {
-    const enriched = this.enrichProduct(data as Product);
-    await updateDoc(doc(this.firestore, 'products', id), { ...enriched, updated_at: serverTimestamp() });
-  }
-
-  async delete(id: string): Promise<void> {
-    await deleteDoc(doc(this.firestore, 'products', id));
+    const { data } = await this.sb.from('products').select('*').eq('id', id).single();
+    return data as Product ?? null;
   }
 
   async getLowStock(): Promise<Product[]> {
-    const snap = await getDocs(query(this.col, where('stock_quantity', '<=', 2)));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }) as Product);
+    const { data } = await this.sb.from('products').select('*').lte('stock_quantity', 2);
+    return (data ?? []) as Product[];
   }
 
-  private enrichProduct(p: Partial<Product>): Partial<Product> {
-    if (p.purchase_price) {
-      p.selling_price = p.purchase_price * 1.2;
-    }
+  async add(data: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
+    const enriched = this.enrich(data);
+    const { error } = await this.sb.from('products').insert(enriched);
+    if (error) throw error;
+  }
+
+  async update(id: string, data: Partial<Product>): Promise<void> {
+    const enriched = this.enrich(data as Product);
+    const { error } = await this.sb.from('products').update({ ...enriched, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
+  }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await this.sb.from('products').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  private enrich(p: Partial<Product>): Partial<Product> {
+    if (p.purchase_price) p.selling_price = +(p.purchase_price * 1.2).toFixed(2);
     if (p.expiration_date) {
       p.has_promotion = shouldHavePromotion(p as Product);
       p.promotion_discount = p.has_promotion ? 20 : 0;

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+
 import { CategoryService } from '../../../../core/services/category.service';
 import { Category } from '../../../../core/models/category.model';
 
@@ -29,14 +29,6 @@ const ICONS = ['🏥','🖥️','🔬','💊','🩺','🩻','💉','🩹','🧬'
           <div class="form-field">
             <label class="form-label">{{ 'CATEGORY.NAME_FR' | translate }} *</label>
             <input type="text" [(ngModel)]="form.name_fr" name="name_fr" required class="form-input" />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ 'CATEGORY.NAME_AR' | translate }}</label>
-            <input type="text" [(ngModel)]="form.name_ar" name="name_ar" class="form-input" dir="rtl" />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ 'CATEGORY.NAME_EN' | translate }}</label>
-            <input type="text" [(ngModel)]="form.name_en" name="name_en" class="form-input" />
           </div>
           <div class="form-field">
             <label class="form-label">{{ 'CATEGORY.DESCRIPTION' | translate }}</label>
@@ -70,7 +62,7 @@ const ICONS = ['🏥','🖥️','🔬','💊','🩺','🩻','💉','🩹','🧬'
 })
 export class CategoryFormComponent implements OnInit {
   private categorySvc = inject(CategoryService);
-  private firestore = inject(Firestore);
+  
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -78,7 +70,7 @@ export class CategoryFormComponent implements OnInit {
   protected saving = signal(false);
   protected error = signal('');
   protected icons = ICONS;
-  protected form: Partial<Category> = { name_fr: '', name_ar: '', name_en: '', description: '', icon: '🏥' };
+  protected form: Partial<Category> = { name_fr: '', description: '', icon: '🏥' };
   private editId: string | null = null;
 
   async ngOnInit(): Promise<void> {
@@ -86,8 +78,8 @@ export class CategoryFormComponent implements OnInit {
     if (id && id !== 'new') {
       this.isEdit.set(true);
       this.editId = id;
-      const snap = await getDoc(doc(this.firestore, 'categories', id));
-      if (snap.exists()) this.form = { id, ...snap.data() } as Category;
+      const cat = await this.categorySvc.getById(id);
+      if (cat) this.form = cat;
     }
   }
 

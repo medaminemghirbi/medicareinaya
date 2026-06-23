@@ -1,9 +1,7 @@
 export interface OrderItem {
   productId: string;
   name_fr: string;
-  name_en: string;
-  name_ar: string;
-  image: string;
+  image?: string;
   unit_price: number;
   quantity: number;
   subtotal: number;
@@ -21,8 +19,8 @@ export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'c
 
 export interface Order {
   id?: string;
-  userId: string;
-  userEmail: string;
+  user_id: string;
+  user_email: string;
   items: OrderItem[];
   subtotal: number;
   delivery_fee: number;
@@ -31,6 +29,6 @@ export interface Order {
   payment_method: 'cod';
   delivery_address: DeliveryAddress;
   notes?: string;
-  created_at: any;
-  updated_at: any;
+  created_at?: string;
+  updated_at?: string;
 }

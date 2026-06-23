@@ -46,7 +46,7 @@ const STATUS_CLASSES: Record<string, string> = {
               <div class="flex items-start justify-between mb-4">
                 <div>
                   <p class="text-xs font-mono mb-1" style="color:var(--text-secondary)">{{ 'ORDERS.ORDER_ID' | translate }}: {{ order.id }}</p>
-                  <p class="text-sm" style="color:var(--text-secondary)">{{ order.created_at?.toDate ? (order.created_at.toDate() | date:'dd/MM/yyyy HH:mm') : '' }}</p>
+                  <p class="text-sm" style="color:var(--text-secondary)">{{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
                 </div>
                 <span [class]="'badge ' + getStatusClass(order.status)">
                   {{ 'ORDERS.STATUS.' + order.status.toUpperCase() | translate }}
@@ -95,7 +95,7 @@ export class ClientOrdersComponent {
 
   protected orders = toSignal(
     toObservable(this.auth.currentUser).pipe(
-      switchMap(user => user ? this.orderSvc.getByUser(user.uid) : of([]))
+      switchMap(user => user ? this.orderSvc.getByUser(user.id) : of([]))
     ),
     { initialValue: [] as Order[] }
   );

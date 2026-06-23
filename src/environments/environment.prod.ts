@@ -1,12 +1,7 @@
 export const environment = {
   production: true,
-  firebase: {
-    apiKey: "AIzaSyDf4l9DnNrxKLUAkkkC5uv4M-3UMbyvNcM",
-    authDomain: "medicareinaya.firebaseapp.com",
-    projectId: "medicareinaya",
-    storageBucket: "medicareinaya.firebasestorage.app",
-    messagingSenderId: "831198112204",
-    appId: "1:831198112204:web:c86a54ffc789a219f55569",
-    //measurementId: "G-EE83LRCWWR"
+    supabase: {
+    url: 'https://bgctgltghqyqqrqortdr.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnY3RnbHRnaHF5cXFycW9ydGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDQwNjMsImV4cCI6MjA5Nzc4MDA2M30.9h1hAOLhhEKe5LoVjJyL9bwaT4_v2eTHarE1Ji9xXVA',
   },
 };

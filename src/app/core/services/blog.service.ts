@@ -1,38 +1,45 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore, collection, collectionData, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy, where
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 import { BlogArticle } from '../models/blog.model';
 
 @Injectable({ providedIn: 'root' })
 export class BlogService {
-  private firestore = inject(Firestore);
-  private col = collection(this.firestore, 'blog_articles');
+  private sb = inject(SupabaseService).client;
 
   getAll(): Observable<BlogArticle[]> {
-    return collectionData(query(this.col, orderBy('created_at', 'desc')), { idField: 'id' }) as Observable<BlogArticle[]>;
+    return from(
+      this.sb.from('blog_articles').select('*').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as BlogArticle[])
+    );
   }
 
   getPublished(): Observable<BlogArticle[]> {
-    return collectionData(
-      query(this.col, where('published', '==', true), orderBy('created_at', 'desc')),
-      { idField: 'id' }
-    ) as Observable<BlogArticle[]>;
+    return from(
+      this.sb.from('blog_articles').select('*').eq('status', 'published').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as BlogArticle[])
+    );
+  }
+
+  async getById(id: string): Promise<BlogArticle | null> {
+    const { data } = await this.sb.from('blog_articles').select('*').eq('id', id).single();
+    return data as BlogArticle ?? null;
   }
 
   async add(data: Omit<BlogArticle, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
     const slug = this.toSlug(data.title_en || data.title_fr);
-    await addDoc(this.col, { ...data, slug, created_at: serverTimestamp(), updated_at: serverTimestamp() });
+    const { error } = await this.sb.from('blog_articles').insert({ ...data, slug });
+    if (error) throw error;
   }
 
   async update(id: string, data: Partial<BlogArticle>): Promise<void> {
-    await updateDoc(doc(this.firestore, 'blog_articles', id), { ...data, updated_at: serverTimestamp() });
+    const { error } = await this.sb.from('blog_articles').update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
   }
 
   async delete(id: string): Promise<void> {
-    await deleteDoc(doc(this.firestore, 'blog_articles', id));
+    const { error } = await this.sb.from('blog_articles').delete().eq('id', id);
+    if (error) throw error;
   }
 
   private toSlug(text: string): string {

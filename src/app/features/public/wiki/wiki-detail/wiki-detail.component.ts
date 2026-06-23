@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { WikiService } from '../../../../core/services/wiki.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { WikiPage } from '../../../../core/models/wiki.model';
 
@@ -54,7 +54,7 @@ import { WikiPage } from '../../../../core/models/wiki.model';
   `,
 })
 export class WikiDetailComponent implements OnInit {
-  private firestore = inject(Firestore);
+  private wikiSvc = inject(WikiService);
   private langSvc = inject(LanguageService);
   private route = inject(ActivatedRoute);
 
@@ -64,8 +64,8 @@ export class WikiDetailComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      const snap = await getDoc(doc(this.firestore, 'wiki_pages', id));
-      if (snap.exists()) this.page.set({ id: snap.id, ...snap.data() } as WikiPage);
+      const page = await this.wikiSvc.getById(id);
+      if (page) this.page.set(page);
     }
     this.loading.set(false);
   }

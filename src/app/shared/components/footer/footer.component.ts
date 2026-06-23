@@ -14,14 +14,9 @@ import { TranslatePipe } from '@ngx-translate/core';
           <!-- Brand -->
           <div class="md:col-span-2">
             <div class="flex items-center gap-2.5 mb-4">
-              <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--primary), var(--accent))">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-              </div>
-              <span class="text-lg font-bold" style="color: var(--text-primary)">
-                Medicare<span style="color: var(--primary)">Inaya</span>
-              </span>
+          <a routerLink="/" class="flex items-center gap-2">
+            <img src="assets/images/logo.png" alt="MedicareInaya" class="h-36 w-auto" />
+          </a>
             </div>
             <p class="text-sm leading-relaxed max-w-xs" style="color: var(--text-secondary)">
               {{ 'FOOTER.DESCRIPTION' | translate }}

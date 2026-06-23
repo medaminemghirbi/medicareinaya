@@ -10,14 +10,10 @@ import { AuthService } from '../../../core/services/auth.service';
 const DELIVERY = 8;
 
 const WILAYAS = [
-  'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar',
-  'Blida','Bouira','Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Alger',
-  'Djelfa','Jijel','Sétif','Saïda','Skikda','Sidi Bel Abbès','Annaba','Guelma',
-  'Constantine','Médéa','Mostaganem','M\'Sila','Mascara','Ouargla','Oran','El Bayadh',
-  'Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf','Tissemsilt','El Oued',
-  'Khenchela','Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent',
-  'Ghardaïa','Relizane','Timimoun','Bordj Badji Mokhtar','Ouled Djellal','Béni Abbès',
-  'In Salah','In Guezzam','Touggourt','Djanet','El M\'Ghair','El Meniaa',
+  'Tunis','Ariana','Ben Arous','Manouba','Nabeul','Zaghouan','Bizerte',
+  'Béja','Jendouba','Kef','Siliana','Sousse','Monastir','Mahdia',
+  'Sfax','Kairouan','Kasserine','Sidi Bouzid','Gabès','Medenine',
+  'Tataouine','Gafsa','Tozeur','Kébili',
 ];
 
 @Component({
@@ -179,8 +175,6 @@ export class CheckoutComponent {
       const items = this.cart.items().map(i => ({
         productId: i.productId,
         name_fr: i.name_fr,
-        name_en: i.name_en,
-        name_ar: i.name_ar,
         image: i.image,
         unit_price: i.unit_price,
         quantity: i.quantity,
@@ -189,8 +183,8 @@ export class CheckoutComponent {
 
       const subtotal = +this.cart.subtotal().toFixed(2);
       const id = await this.orderSvc.create({
-        userId: user.uid,
-        userEmail: user.email ?? '',
+        user_id: user.id,
+        user_email: user.email ?? '',
         items,
         subtotal,
         delivery_fee: DELIVERY,

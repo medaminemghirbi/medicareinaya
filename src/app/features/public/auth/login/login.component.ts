@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,14 +15,7 @@ import { Router } from '@angular/router';
       <div class="w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-8">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, var(--primary), var(--accent))">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-          </div>
-          <h1 class="text-2xl font-bold" style="color: var(--text-primary)">
-            Medicare<span style="color: var(--primary)">Inaya</span>
-          </h1>
+          <img src="assets/images/logo.png" alt="MedicareInaya" class="h-36 w-auto mx-auto mb-4" />
           <p class="mt-1 text-sm" style="color: var(--text-secondary)">{{ 'AUTH.LOGIN.SUBTITLE' | translate }}</p>
         </div>
 
@@ -99,12 +92,20 @@ export class LoginComponent {
   protected error = signal('');
   protected showPwd = signal(false);
 
+  constructor() {
+    // Redirect already-authenticated users visiting /auth/login
+    effect(() => {
+      if (!this.authSvc.loading() && !this.loading() && this.authSvc.isLoggedIn()) {
+        this.router.navigate([this.authSvc.isAdmin() ? '/admin/dashboard' : '/']);
+      }
+    });
+  }
+
   async login(): Promise<void> {
     this.loading.set(true);
     this.error.set('');
     try {
-      await this.authSvc.login(this.email, this.password);
-      const profile = this.authSvc.userProfile();
+      const profile = await this.authSvc.login(this.email, this.password);
       this.router.navigate([profile?.role === 'admin' ? '/admin/dashboard' : '/']);
     } catch (e: any) {
       this.error.set(e.message ?? 'Erreur de connexion');

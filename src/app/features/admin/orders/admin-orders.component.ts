@@ -32,8 +32,8 @@ const STATUSES: OrderStatus[] = ['pending', 'confirmed', 'shipped', 'delivered',
               <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
                 <div>
                   <p class="text-xs font-mono" style="color:var(--text-secondary)">{{ order.id }}</p>
-                  <p class="text-sm font-medium" style="color:var(--text-primary)">{{ order.userEmail }}</p>
-                  <p class="text-xs" style="color:var(--text-secondary)">{{ order.created_at?.toDate ? (order.created_at.toDate() | date:'dd/MM/yyyy HH:mm') : '' }}</p>
+                  <p class="text-sm font-medium" style="color:var(--text-primary)">{{ order.user_email }}</p>
+                  <p class="text-xs" style="color:var(--text-secondary)">{{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
                 </div>
                 <div class="flex items-center gap-3">
                   <span [class]="'badge ' + getStatusClass(order.status)">

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+
 import { WikiService } from '../../../../core/services/wiki.service';
 import { WikiPage } from '../../../../core/models/wiki.model';
 
@@ -92,7 +92,7 @@ import { WikiPage } from '../../../../core/models/wiki.model';
 })
 export class WikiFormComponent implements OnInit {
   private wikiSvc = inject(WikiService);
-  private firestore = inject(Firestore);
+  
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -114,9 +114,9 @@ export class WikiFormComponent implements OnInit {
     if (id && id !== 'new') {
       this.isEdit.set(true);
       this.editId = id;
-      const snap = await getDoc(doc(this.firestore, 'wiki_pages', id));
-      if (snap.exists()) {
-        this.form = { id, ...snap.data() } as WikiPage;
+      const page = await this.wikiSvc.getById(id);
+      if (page) {
+        this.form = page;
         this.tagsStr = (this.form.tags ?? []).join(', ');
       }
     }

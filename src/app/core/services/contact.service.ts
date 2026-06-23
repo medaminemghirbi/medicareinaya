@@ -1,32 +1,33 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore, collection, collectionData, addDoc, updateDoc,
-  doc, serverTimestamp, query, orderBy, where
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 import { ContactRequest } from '../models/contact.model';
 
 @Injectable({ providedIn: 'root' })
 export class ContactService {
-  private firestore = inject(Firestore);
-  private col = collection(this.firestore, 'contact_requests');
+  private sb = inject(SupabaseService).client;
 
   getAll(): Observable<ContactRequest[]> {
-    return collectionData(query(this.col, orderBy('created_at', 'desc')), { idField: 'id' }) as Observable<ContactRequest[]>;
+    return from(
+      this.sb.from('contact_requests').select('*').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as ContactRequest[])
+    );
   }
 
   getNew(): Observable<ContactRequest[]> {
-    return collectionData(
-      query(this.col, where('status', '==', 'new'), orderBy('created_at', 'desc')),
-      { idField: 'id' }
-    ) as Observable<ContactRequest[]>;
+    return from(
+      this.sb.from('contact_requests').select('*').eq('status', 'new').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as ContactRequest[])
+    );
   }
 
   async submit(data: Omit<ContactRequest, 'id' | 'status' | 'created_at'>): Promise<void> {
-    await addDoc(this.col, { ...data, status: 'new', created_at: serverTimestamp() });
+    const { error } = await this.sb.from('contact_requests').insert({ ...data, status: 'new' });
+    if (error) throw error;
   }
 
   async updateStatus(id: string, status: ContactRequest['status']): Promise<void> {
-    await updateDoc(doc(this.firestore, 'contact_requests', id), { status });
+    const { error } = await this.sb.from('contact_requests').update({ status }).eq('id', id);
+    if (error) throw error;
   }
 }

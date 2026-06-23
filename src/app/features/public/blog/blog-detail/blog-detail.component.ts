@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { BlogService } from '../../../../core/services/blog.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { BlogArticle } from '../../../../core/models/blog.model';
 
@@ -56,7 +56,7 @@ import { BlogArticle } from '../../../../core/models/blog.model';
   `,
 })
 export class BlogDetailComponent implements OnInit {
-  private firestore = inject(Firestore);
+  private blogSvc = inject(BlogService);
   private langSvc = inject(LanguageService);
   private route = inject(ActivatedRoute);
 
@@ -66,8 +66,8 @@ export class BlogDetailComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      const snap = await getDoc(doc(this.firestore, 'blog_articles', id));
-      if (snap.exists()) this.article.set({ id: snap.id, ...snap.data() } as BlogArticle);
+      const article = await this.blogSvc.getById(id);
+      if (article) this.article.set(article);
     }
     this.loading.set(false);
   }

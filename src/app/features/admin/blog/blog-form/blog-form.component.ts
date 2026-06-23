@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+
 import { BlogService } from '../../../../core/services/blog.service';
 import { BlogArticle } from '../../../../core/models/blog.model';
 
@@ -85,7 +85,7 @@ import { BlogArticle } from '../../../../core/models/blog.model';
 })
 export class BlogFormComponent implements OnInit {
   private blogSvc = inject(BlogService);
-  private firestore = inject(Firestore);
+  
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -107,9 +107,9 @@ export class BlogFormComponent implements OnInit {
     if (id && id !== 'new') {
       this.isEdit.set(true);
       this.editId = id;
-      const snap = await getDoc(doc(this.firestore, 'blog_articles', id));
-      if (snap.exists()) {
-        this.form = { id, ...snap.data() } as BlogArticle;
+      const article = await this.blogSvc.getById(id);
+      if (article) {
+        this.form = article;
         this.tagsStr = (this.form.tags ?? []).join(', ');
       }
     }

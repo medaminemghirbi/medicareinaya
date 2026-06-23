@@ -27,37 +27,11 @@ import { Product } from '../../../../core/models/product.model';
         <!-- Basic Info -->
         <div class="card p-6">
           <h2 class="font-bold mb-4" style="color: var(--text-primary)">{{ 'ADMIN.PRODUCTS.BASIC_INFO' | translate }}</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="form-field">
               <label class="form-label">{{ 'PRODUCT.NAME_FR' | translate }} *</label>
               <input type="text" [(ngModel)]="form.name_fr" name="name_fr" required class="form-input" />
             </div>
-            <div class="form-field">
-              <label class="form-label">{{ 'PRODUCT.NAME_AR' | translate }}</label>
-              <input type="text" [(ngModel)]="form.name_ar" name="name_ar" class="form-input" dir="rtl" />
-            </div>
-            <div class="form-field">
-              <label class="form-label">{{ 'PRODUCT.NAME_EN' | translate }}</label>
-              <input type="text" [(ngModel)]="form.name_en" name="name_en" class="form-input" />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div class="form-field">
-              <label class="form-label">{{ 'PRODUCT.DESC_FR' | translate }}</label>
-              <textarea [(ngModel)]="form.description_fr" name="description_fr" rows="3" class="form-input resize-none"></textarea>
-            </div>
-            <div class="form-field">
-              <label class="form-label">{{ 'PRODUCT.DESC_AR' | translate }}</label>
-              <textarea [(ngModel)]="form.description_ar" name="description_ar" rows="3" class="form-input resize-none" dir="rtl"></textarea>
-            </div>
-            <div class="form-field">
-              <label class="form-label">{{ 'PRODUCT.DESC_EN' | translate }}</label>
-              <textarea [(ngModel)]="form.description_en" name="description_en" rows="3" class="form-input resize-none"></textarea>
-            </div>
-          </div>
-
-          <div class="mt-4">
             <div class="form-field">
               <label class="form-label">{{ 'PRODUCT.CATEGORY' | translate }} *</label>
               <select [(ngModel)]="form.category_id" name="category_id" required class="form-input">
@@ -66,6 +40,13 @@ import { Product } from '../../../../core/models/product.model';
                   <option [value]="c.id">{{ c.name_fr }}</option>
                 }
               </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="form-field">
+              <label class="form-label">{{ 'PRODUCT.DESC_FR' | translate }}</label>
+              <textarea [(ngModel)]="form.description_fr" name="description_fr" rows="4" class="form-input resize-none"></textarea>
             </div>
           </div>
         </div>
@@ -172,8 +153,8 @@ export class ProductFormComponent implements OnInit {
   protected imageUrls: string[] = [''];
 
   protected form: Partial<Product> = {
-    name_fr: '', name_ar: '', name_en: '',
-    description_fr: '', description_ar: '', description_en: '',
+    name_fr: '',
+    description_fr: '',
     category_id: '',
     purchase_price: 0, selling_price: 0, stock_quantity: 0,
     manufacture_date: '', expiration_date: '',

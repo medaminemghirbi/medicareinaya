@@ -14,14 +14,7 @@ import { Router } from '@angular/router';
     <div class="min-h-screen flex items-center justify-center px-4 py-12" style="background: var(--bg)">
       <div class="w-full max-w-md">
         <div class="text-center mb-8">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, var(--primary), var(--accent))">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-          </div>
-          <h1 class="text-2xl font-bold" style="color: var(--text-primary)">
-            Medicare<span style="color: var(--primary)">Inaya</span>
-          </h1>
+          <img src="assets/images/logo.png" alt="MedicareInaya" class="h-36 w-auto mx-auto mb-4" />
         </div>
 
         <div class="card p-8">

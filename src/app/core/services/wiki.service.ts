@@ -1,38 +1,45 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore, collection, collectionData, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy, where
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 import { WikiPage } from '../models/wiki.model';
 
 @Injectable({ providedIn: 'root' })
 export class WikiService {
-  private firestore = inject(Firestore);
-  private col = collection(this.firestore, 'wiki_pages');
+  private sb = inject(SupabaseService).client;
 
   getAll(): Observable<WikiPage[]> {
-    return collectionData(query(this.col, orderBy('created_at', 'desc')), { idField: 'id' }) as Observable<WikiPage[]>;
+    return from(
+      this.sb.from('wiki_pages').select('*').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as WikiPage[])
+    );
   }
 
   getPublished(): Observable<WikiPage[]> {
-    return collectionData(
-      query(this.col, where('published', '==', true), orderBy('created_at', 'desc')),
-      { idField: 'id' }
-    ) as Observable<WikiPage[]>;
+    return from(
+      this.sb.from('wiki_pages').select('*').eq('status', 'published').order('created_at', { ascending: false })
+        .then(({ data }) => (data ?? []) as WikiPage[])
+    );
+  }
+
+  async getById(id: string): Promise<WikiPage | null> {
+    const { data } = await this.sb.from('wiki_pages').select('*').eq('id', id).single();
+    return data as WikiPage ?? null;
   }
 
   async add(data: Omit<WikiPage, 'id' | 'created_at' | 'updated_at'>): Promise<void> {
     const slug = this.toSlug(data.title_en || data.title_fr);
-    await addDoc(this.col, { ...data, slug, created_at: serverTimestamp(), updated_at: serverTimestamp() });
+    const { error } = await this.sb.from('wiki_pages').insert({ ...data, slug });
+    if (error) throw error;
   }
 
   async update(id: string, data: Partial<WikiPage>): Promise<void> {
-    await updateDoc(doc(this.firestore, 'wiki_pages', id), { ...data, updated_at: serverTimestamp() });
+    const { error } = await this.sb.from('wiki_pages').update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
   }
 
   async delete(id: string): Promise<void> {
-    await deleteDoc(doc(this.firestore, 'wiki_pages', id));
+    const { error } = await this.sb.from('wiki_pages').delete().eq('id', id);
+    if (error) throw error;
   }
 
   private toSlug(text: string): string {
